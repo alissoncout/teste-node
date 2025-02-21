@@ -1,0 +1,49 @@
+# Ignora a pasta node_modules (dependências do projeto)
+node_modules/
+
+# Ignora arquivos de ambiente (variáveis sensíveis)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Ignora logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignora arquivos de configuração do IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Ignora arquivos de sistema
+.DS_Store
+Thumbs.db
+
+# Ignora pastas de build/compilação
+dist/
+build/
+out/
+coverage/
+
+# Ignora arquivos de cache
+.cache/
+.temp/
+.tmp/
+
+# Ignora arquivos do npm/yarn
+package-lock.json
+yarn.lock
+
+# Ignora arquivos de configuração do sistema operacional
+*.swp
+*.swo
+*~
