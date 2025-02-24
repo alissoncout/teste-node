@@ -3,12 +3,30 @@ const csvParser = require('csv-parser');
 const { db } = require('./database');
 
 function loadCSVData() {
-    fs.createReadStream('movies.csv')
-        .pipe(csvParser({ separator: ';' }))
-        .on('data', (row) => {
-            db.run(`INSERT INTO movies (year, title, studios, producers, winner) VALUES (?, ?, ?, ?, ?)`,
-                [row.year, row.title, row.studios, row.producers, row.winner === 'yes']);
-        });
+    return new Promise((resolve, reject) => {
+        const inserts = [];
+
+        fs.createReadStream('movies.csv')
+            .pipe(csvParser({ separator: ';' }))
+            .on('data', (row) => {
+                inserts.push(new Promise((res, rej) => {
+                    db.run(
+                        `INSERT INTO movies (year, title, studios, producers, winner) VALUES (?, ?, ?, ?, ?)`,
+                        [row.year, row.title, row.studios, row.producers, row.winner === 'yes'],
+                        (err) => (err ? rej(err) : res())
+                    );
+                }));
+            })
+            .on('end', async () => {
+                try {
+                    await Promise.all(inserts);
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            })
+            .on('error', reject);
+    });
 }
 
 function getAwardIntervals(callback) {
@@ -17,7 +35,9 @@ function getAwardIntervals(callback) {
 
         const producerAwards = {};
         rows.forEach(row => {
-            const producers = row.producers.split(',').map(p => p.trim());
+            const producers = row.producers
+                .split(/,| and /) //levando em consideração o padrão do csv, onde múltilplos ganhadores estão separados por 'and'
+                .map(p => p.trim());
             producers.forEach(producer => {
                 if (!producerAwards[producer]) {
                     producerAwards[producer] = [];
